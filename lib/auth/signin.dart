@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lorem_ipsum/main.dart';
+import 'package:lorem_ipsum/screens/user_goals/info.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SignInScreen extends StatefulWidget {
@@ -117,6 +118,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                       password: password,
                                     );
 
+                                    final User? user = res.user;
                                     if (res.user == null) {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(
@@ -126,8 +128,21 @@ class _SignInScreenState extends State<SignInScreen> {
                                         ),
                                       );
                                     } else {
-                                      // Navigator.pushNamedAndRemoveUntil(
-                                      //     context, MainScreen.id, (route) => false);
+                                      final response = await supabase
+                                          .from('user_profile')
+                                          .select('profile_completed')
+                                          .eq('user_id', user!.id);
+                                      print(response);
+
+                                      if (response.isEmpty ||
+                                          response[0]['profile_completed'] ==
+                                              false) {
+                                        print('----');
+                                        Navigator.pushNamed(
+                                            context, BMIScreen.id);
+                                      } else {
+                                        print("Welcome back, ${user.email}!");
+                                      }
                                       print('User signed in');
                                     }
                                   } on AuthException catch (e) {
@@ -140,8 +155,8 @@ class _SignInScreenState extends State<SignInScreen> {
                                   } catch (e) {
                                     // Handle other exceptions
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('An error occurred'),
+                                      SnackBar(
+                                        content: Text('An error occurred: $e'),
                                       ),
                                     );
                                   }

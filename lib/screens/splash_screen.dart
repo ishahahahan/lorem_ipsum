@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:lorem_ipsum/auth/signin.dart';
 import 'package:lorem_ipsum/main.dart';
+import 'package:lorem_ipsum/screens/home_screen.dart';
 import 'package:lorem_ipsum/screens/welcome.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -26,6 +28,7 @@ class _SplashScreenState extends State<SplashScreen> {
     final session = supabase.auth.currentSession;
     if (session != null) {
       // Navigator.pushReplacementNamed(context, MainScreen.id);
+      Navigator.pushReplacementNamed(context, SignInScreen.id);
     } else {
       Navigator.pushReplacementNamed(context, WelcomeScreen.id);
     }

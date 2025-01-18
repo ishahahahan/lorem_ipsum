@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:lorem_ipsum/auth/signup.dart';
 import 'package:lorem_ipsum/const.dart';
+import 'package:lorem_ipsum/screens/home_screen.dart';
+import 'package:lorem_ipsum/screens/splash_screen.dart';
+import 'package:lorem_ipsum/screens/user_goals/info.dart';
 import 'package:lorem_ipsum/screens/welcome.dart';
 import 'package:lorem_ipsum/auth/signin.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -30,10 +33,14 @@ class MyApp extends StatelessWidget {
       title: 'Calorie App',
       theme: ThemeData.dark(),
       home: const WelcomeScreen(),
+      initialRoute: SplashScreen.id,
       routes: {
+        SplashScreen.id: (context) => const SplashScreen(),
         WelcomeScreen.id: (context) => const WelcomeScreen(),
         SignInScreen.id: (context) => const SignInScreen(),
         SignUpScreen.id: (context) => const SignUpScreen(),
+        BMIScreen.id: (context) => const BMIScreen(),
+        HomeScreen.id: (context) => const HomeScreen(),
       },
     );
   }

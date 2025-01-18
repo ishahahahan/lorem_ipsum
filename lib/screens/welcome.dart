@@ -24,6 +24,9 @@ class WelcomeScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Spacer(flex: 4),
+                const SizedBox(
+                  height: 140,
+                ),
                 // Title Text
                 RichText(
                   text: const TextSpan(
@@ -33,14 +36,21 @@ class WelcomeScreen extends StatelessWidget {
                       color: Colors.black,
                     ),
                     children: [
-                      TextSpan(text: 'Build\n'),
+                      TextSpan(
+                        text: 'Build\n',
+                        style: TextStyle(color: Colors.black, fontSize: 70),
+                      ),
                       TextSpan(
                         text: 'healthy\n',
                         style: TextStyle(
                           color: Color(0xFF4CAF50),
+                          fontSize: 70,
                         ),
                       ),
-                      TextSpan(text: 'habits'),
+                      TextSpan(
+                        text: 'habits',
+                        style: TextStyle(color: Colors.black, fontSize: 70),
+                      ),
                     ],
                   ),
                 ),

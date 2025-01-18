@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:lorem_ipsum/main.dart';
+import 'package:lorem_ipsum/screens/home_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class BMIScreen extends StatefulWidget {
   const BMIScreen({super.key});
 
-  static const String id = '/signin';
+  static const String id = '/bmi';
 
   @override
   State<BMIScreen> createState() => _BMIScreenState();
@@ -13,13 +14,17 @@ class BMIScreen extends StatefulWidget {
 
 class _BMIScreenState extends State<BMIScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _heightController = TextEditingController();
+  final _currentWeightController = TextEditingController();
+  final _desiredWeightController = TextEditingController();
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
+    _nameController.dispose();
+    _heightController.dispose();
+    _currentWeightController.dispose();
+    _desiredWeightController.dispose();
     super.dispose();
   }
 
@@ -37,18 +42,21 @@ class _BMIScreenState extends State<BMIScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
-                    height: 10,
+                    height: 48,
                   ),
                   Text(
-                    'Sign In',
+                    'Get Started on Your',
                     style: TextStyle(
                         color: Colors.black,
-                        fontSize: 50,
-                        fontWeight: FontWeight.w700),
+                        fontSize: 24,
+                        fontWeight: FontWeight.w500),
                   ),
                   Text(
-                    'Login kar behenchod',
-                    style: TextStyle(color: Colors.black, fontSize: 16),
+                    'Goals',
+                    style: TextStyle(
+                        color: Color(0xff2FB555),
+                        fontSize: 24,
+                        fontWeight: FontWeight.w600),
                   ),
                 ],
               ),
@@ -74,23 +82,91 @@ class _BMIScreenState extends State<BMIScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(
-                            height: 60,
+                            height: 30,
                           ),
-                          _buildInputField(
-                            controller: _emailController,
-                            label: 'Email',
-                            hint: 'Enter Email',
-                            isRequired: true,
+                          const Text(
+                            "Your Name",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 20,
+                            ),
                           ),
-                          const SizedBox(height: 20),
-                          _buildInputField(
-                            controller: _passwordController,
-                            label: 'Password',
-                            hint: 'Enter Password',
-                            isRequired: true,
-                            isPassword: true,
+                          TextField(
+                            controller: _nameController,
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 16,
+                            ),
+                            decoration: const InputDecoration(
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.black),
+                              ),
+                            ),
                           ),
-                          const SizedBox(height: 80),
+                          const SizedBox(height: 10),
+                          const Text(
+                            "What is your current height?",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 20,
+                            ),
+                          ),
+                          TextField(
+                            controller: _heightController,
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 16,
+                            ),
+                            decoration: const InputDecoration(
+                              hintText: "Enter height in cm",
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.black),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          const Text(
+                            "What is your current weight?",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 20,
+                            ),
+                          ),
+                          TextField(
+                            controller: _currentWeightController,
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 16,
+                            ),
+                            decoration: const InputDecoration(
+                              hintText: "Enter weight in kg",
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.black),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          const Text(
+                            "What is your desired weight?",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 20,
+                            ),
+                          ),
+                          TextField(
+                            controller: _desiredWeightController,
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 16,
+                            ),
+                            decoration: const InputDecoration(
+                              hintText: "Enter weight in kg",
+                              enabledBorder: UnderlineInputBorder(
+                                borderSide: BorderSide(color: Colors.black),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 40),
                           Container(
                             width: double.infinity,
                             height: 60,
@@ -99,8 +175,49 @@ class _BMIScreenState extends State<BMIScreen> {
                               borderRadius: BorderRadius.circular(30),
                             ),
                             child: TextButton(
-                              onPressed: ()  {
-                                
+                              onPressed: () async {
+                                bool isLoading;
+                                try {
+                                  setState(() {
+                                    isLoading = true;
+                                  });
+
+                                  final String name =
+                                      _nameController.text.trim();
+                                  final double height = double.parse(
+                                      _heightController.text.trim());
+                                  final double currentWeight = double.parse(
+                                      _currentWeightController.text.trim());
+                                  final double desiredWeight = double.parse(
+                                      _desiredWeightController.text.trim());
+
+                                  await supabase.from('user_profile').update({
+                                    'name': name,
+                                    'height': height,
+                                    'weight': currentWeight,
+                                    'desired_weight': desiredWeight,
+                                  }).eq(
+                                      'user_id', supabase.auth.currentUser!.id);
+
+                                  if (mounted) {
+                                    Navigator.pushNamedAndRemoveUntil(context,
+                                        HomeScreen.id, (route) => false);
+                                  }
+                                } catch (e) {
+                                  if (mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content:
+                                              Text('Error: ${e.toString()}')),
+                                    );
+                                  }
+                                } finally {
+                                  if (mounted) {
+                                    setState(() {
+                                      isLoading = false;
+                                    });
+                                  }
+                                }
                               },
                               child: const Text(
                                 'Submit',
@@ -121,67 +238,5 @@ class _BMIScreenState extends State<BMIScreen> {
             )
           ],
         ));
-  }
-
-  Widget _buildInputField({
-    required TextEditingController controller,
-    required String label,
-    required String hint,
-    bool isRequired = false,
-    bool isPassword = false,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
-                color: Colors.black,
-              ),
-            ),
-            if (isRequired)
-              const Text(
-                ' *',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontSize: 24,
-                ),
-              ),
-          ],
-        ),
-        TextField(
-          controller: controller,
-          obscureText: isPassword,
-          style: const TextStyle(
-            fontSize: 20,
-            color: Colors.black54,
-          ),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: const TextStyle(
-              fontSize: 20,
-              color: Colors.black38,
-            ),
-            enabledBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(
-                color: Colors.black38,
-                width: 1.0,
-              ),
-            ),
-            focusedBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(
-                color: Colors.black,
-                width: 1.0,
-              ),
-            ),
-            contentPadding: const EdgeInsets.only(top: 20),
-          ),
-        ),
-      ],
-    );
   }
 }

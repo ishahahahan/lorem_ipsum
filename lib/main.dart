@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lorem_ipsum/auth/signup.dart';
 import 'package:lorem_ipsum/const.dart';
+import 'package:lorem_ipsum/screens/activity_screen.dart';
 import 'package:lorem_ipsum/screens/home_screen.dart';
 import 'package:lorem_ipsum/screens/splash_screen.dart';
 import 'package:lorem_ipsum/screens/user_goals/info.dart';
@@ -41,6 +42,7 @@ class MyApp extends StatelessWidget {
         SignUpScreen.id: (context) => const SignUpScreen(),
         BMIScreen.id: (context) => const BMIScreen(),
         HomeScreen.id: (context) => const HomeScreen(),
+        ActivityScreen.id: (context) => const ActivityScreen(),
       },
     );
   }

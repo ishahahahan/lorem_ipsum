@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lorem_ipsum/main.dart';
+import 'package:lorem_ipsum/screens/home_screen.dart';
 import 'package:lorem_ipsum/screens/user_goals/info.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -48,7 +49,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         fontWeight: FontWeight.w700),
                   ),
                   Text(
-                    'Login kar behenchod',
+                    'Login for healthy lifestyle!',
                     style: TextStyle(color: Colors.black, fontSize: 16),
                   ),
                 ],
@@ -142,6 +143,8 @@ class _SignInScreenState extends State<SignInScreen> {
                                             context, BMIScreen.id);
                                       } else {
                                         print("Welcome back, ${user.email}!");
+                                        Navigator.pushNamed(
+                                            context, HomeScreen.id);
                                       }
                                       print('User signed in');
                                     }

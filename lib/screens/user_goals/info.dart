@@ -196,6 +196,7 @@ class _BMIScreenState extends State<BMIScreen> {
                                     'height': height,
                                     'weight': currentWeight,
                                     'desired_weight': desiredWeight,
+                                    'profile_completed': true,
                                   }).eq(
                                       'user_id', supabase.auth.currentUser!.id);
 

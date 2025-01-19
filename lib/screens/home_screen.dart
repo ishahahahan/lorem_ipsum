@@ -333,11 +333,23 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   FutureBuilder<List<Map<String, dynamic>>> _buildMealLogSection() {
+    final user = supabase.auth.currentUser;
+
+    if (user == null) {
+      return FutureBuilder<List<Map<String, dynamic>>>(
+        future: Future.value([]),
+        builder: (context, snapshot) {
+          return const Center(
+            child: Text('Please sign in to view your meal log'),
+          );
+        },
+      );
+    }
     return FutureBuilder<List<Map<String, dynamic>>>(
       future: supabase
           .from('food_intake')
           .select()
-          .eq('user_id', supabase.auth.currentUser!.id)
+          .eq('user_id', user.id)
           .order('meal_time', ascending: false)
           .then((response) => response),
       builder: (context, snapshot) {

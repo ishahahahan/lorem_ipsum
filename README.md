@@ -1,7 +1,5 @@
 # AI-Powered Calorie Tracker
 
-[![Ask DeepWiki](https://devin.ai/assets/askdeepwiki.png)](https://deepwiki.com/ishahahahan/lorem_ipsum)
-
 This repository contains a cross-platform mobile application for tracking daily caloric and nutritional intake, built with Flutter. The app features AI-powered food recognition from images, barcode scanning for quick lookups, and user authentication and data persistence using Supabase.
 
 ## Features

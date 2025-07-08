@@ -1,0 +1,11 @@
+flask
+flask_cors
+tensorflow
+numpy
+opencv-python
+pillow
+werkzeug
+pyzbar
+requests
+boto3
+gunicorn

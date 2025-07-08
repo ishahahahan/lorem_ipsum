@@ -9,6 +9,10 @@ import cv2
 import re
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
+from s3_utils import upload_file_to_s3, download_file_from_s3
+import os
+import uuid
+import tempfile
 
 # -------------------------
 IMG_DIMN = 224
@@ -75,7 +79,9 @@ def load_model():
         'MSE': keras.losses.MeanSquaredError(),
         'mean_squared_error': keras.losses.MeanSquaredError()
     }
-    model = keras.models.load_model('d:/Ishan/projects/repos/lorem_ipsum/service/inceptionv3_saved_model.h5', custom_objects=custom_objects)
+    # Use a relative path or environment variable for model path
+    model_path = os.environ.get('MODEL_PATH', 'inceptionv3_saved_model.h5')
+    model = keras.models.load_model(model_path, custom_objects=custom_objects)
     model.compile(
         optimizer=Adam(learning_rate=1e-5),
         loss=keras.losses.MeanSquaredError()
@@ -127,7 +133,7 @@ def denormalize_outputs(outputs):
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    print("receievd request for prediction")
+    print("received request for prediction")
     if 'file' not in request.files:
         print("no files here")
         return jsonify({"error": "No file part"})
@@ -137,28 +143,42 @@ def predict():
         return jsonify({"error": "No selected file"})
     
     if file:
+        # Generate unique filename and upload to S3
         filename = secure_filename(file.filename)
-        file_path = f"./{filename}"
-        file.save(file_path)
+        unique_filename = f"{uuid.uuid4()}_{filename}"
+        s3_url = upload_file_to_s3(file, unique_filename, folder='food_images')
         
-        # preprocessing the image - resizing to 224x224 and scaling by 1./255.0
-        preprocessed_img = preprocess_image(img_path=file_path)
-
-        # reshaping to 4d nparray
+        if not s3_url:
+            return jsonify({"error": "Failed to upload to S3"})
+        
+        # Create a temporary file to process
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            temp_path = temp_file.name
+        
+        # Download from S3 to temp file
+        s3_key = f"food_images/{unique_filename}"
+        if not download_file_from_s3(s3_key, temp_path):
+            return jsonify({"error": "Failed to download from S3"})
+        
+        # Process the image
+        preprocessed_img = preprocess_image(img_path=temp_path)
         img_list = [np.array(preprocessed_img)]
         preprocessed_reshaped_img = np.asarray(img_list)
 
-        # important important numpy array
         model = load_model()
         outputs = model.predict(x=preprocessed_reshaped_img)
         print("Model outputs:", outputs)
 
-        # denormalize the outputs by multiplying with specified max value
+        # Clean up temporary file
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+
+        # Get predictions
         response = denormalize_outputs(outputs)
+        
+        # Add S3 URL to response
+        response['image_url'] = s3_url
+        
         return jsonify(response)
 
     return jsonify({"error": "File upload failed"})
-
-
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)

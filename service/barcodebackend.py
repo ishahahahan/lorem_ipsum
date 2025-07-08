@@ -8,6 +8,9 @@ import io
 from PIL import Image
 from werkzeug.utils import secure_filename
 import os
+from s3_utils import upload_file_to_s3, download_file_from_s3
+import tempfile
+import uuid
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all domains
@@ -87,27 +90,39 @@ def predict():
             return jsonify({"error": "No selected file"}), 400
 
         if file:
-            # Save the uploaded file
+            # Generate unique filename and upload to S3
             filename = secure_filename(file.filename)
-            filepath = os.path.join(UPLOAD_FOLDER, filename)
-            file.save(filepath)
-
-            # Process the image
-            result = process_barcode_image(filepath)
-
-            # Clean up - remove the uploaded file
-            if os.path.exists(filepath):
-                os.remove(filepath)
-
+            unique_filename = f"{uuid.uuid4()}_{filename}"
+            s3_url = upload_file_to_s3(file, unique_filename, folder='barcode_images')
+            
+            if not s3_url:
+                return jsonify({"error": "Failed to upload to S3"}), 500
+            
+            # Create a temporary file to process
+            with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                temp_path = temp_file.name
+            
+            # Download from S3 to temp file
+            s3_key = f"barcode_images/{unique_filename}"
+            if not download_file_from_s3(s3_key, temp_path):
+                return jsonify({"error": "Failed to download from S3"}), 500
+            
+            # Process the barcode
+            result = process_barcode_image(temp_path)
+            
+            # Clean up temporary file
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+            
             if result:
                 if "error" in result:
                     return jsonify(result), 400
+                
+                # Add the S3 image URL to the response
+                result['image_url'] = s3_url
                 return jsonify(result), 200
             else:
                 return jsonify({"error": "Failed to process image"}), 400
 
     except Exception as e:
         return jsonify({"error": f"Server error: {str(e)}"}), 500
-
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=6000)

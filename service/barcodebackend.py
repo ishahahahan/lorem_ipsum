@@ -11,6 +11,9 @@ import os
 from s3_utils import upload_file_to_s3, download_file_from_s3
 import tempfile
 import uuid
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all domains
